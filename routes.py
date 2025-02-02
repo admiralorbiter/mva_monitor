@@ -103,6 +103,7 @@ def init_routes(app):
         school_name = request.args.get('school_name', '')
         sort_by = request.args.get('sort_by', 'state_id')  # Default sort by State ID
         sort_order = request.args.get('sort_order', 'asc')  # Default sort order
+        results_per_page = request.args.get('results_per_page', 10, type=int)  # Default results per page
 
         # Build the query
         query = MVA.query.join(Student).join(School)
@@ -142,8 +143,7 @@ def init_routes(app):
 
         # Pagination
         page = request.args.get('page', 1, type=int)
-        per_page = 10  # Number of records per page
-        mva_records = query.paginate(page=page, per_page=per_page, error_out=False)
+        mva_records = query.paginate(page=page, per_page=results_per_page, error_out=False)
 
         # Calculate start and end pages for pagination
         start_page = max(1, mva_records.page - 2)

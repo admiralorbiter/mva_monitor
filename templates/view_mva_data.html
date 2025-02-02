@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}View MVA Data{% endblock %}
+
+{% block content %}
+<h1>MVA Data</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>State ID</th>
+            <th>School Name</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Grade Year</th>
+            <th>MVA Progress</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mva in mva_records %}
+        <tr>
+            <td>{{ mva.student.state_id }}</td>
+            <td>{{ mva.student.school.school_name }}</td>
+            <td>{{ mva.student.first_name }}</td>
+            <td>{{ mva.student.last_name }}</td>
+            <td>{{ mva.student.grade_year }}</td>
+            <td>{{ mva.description }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %} 

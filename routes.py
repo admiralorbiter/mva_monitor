@@ -94,4 +94,12 @@ def init_routes(app):
             flash(f'An error occurred while importing MVA data: {str(e)}', 'danger')
         
         return redirect(url_for('admin'))  # Redirect back to the admin page
+    
+    @app.route('/view_mva_data')
+    def view_mva_data():
+        """Displays the imported MVA data."""
+        # Fetch all MVA records from the database
+        mva_records = MVA.query.all()
+        
+        return render_template('view_mva_data.html', mva_records=mva_records)
 

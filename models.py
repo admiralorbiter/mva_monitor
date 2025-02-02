@@ -19,6 +19,7 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(256), nullable=False)
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
+    is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
@@ -34,6 +35,9 @@ class Student(db.Model):
     first_name = db.Column(db.String(64), nullable=False)
     last_name = db.Column(db.String(64), nullable=False)
     grade_year = db.Column(db.Integer, nullable=False)
+    
+    # Add a foreign key to reference the School model
+    school_id = db.Column(db.Integer, db.ForeignKey('schools.id'), nullable=False)
 
 # School model
 class School(db.Model):

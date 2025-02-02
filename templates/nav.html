@@ -7,9 +7,15 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           {% if current_user.is_authenticated %}
+            {% if current_user.is_admin %}
+              <li class="nav-item">
+                <a class="nav-link" href="/admin">Admin</a>
+              </li>
+            {% endif %}
             <li class="nav-item">
               <a class="nav-link" href="/logout">Logout</a>
             </li>
+
           {% else %}
             <li class="nav-item">
               <a class="nav-link" href="/login">Login</a>

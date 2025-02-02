@@ -33,7 +33,8 @@ def create_admin():
         new_admin = User(
             username=username,
             email=email,
-            password_hash=generate_password_hash(password)
+            password_hash=generate_password_hash(password),
+            is_admin=True
         )
 
         db.session.add(new_admin)

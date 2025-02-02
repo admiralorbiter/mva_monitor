@@ -2,8 +2,32 @@
 
 {% block title %}View MVA Data{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/table.css') }}">
+{% endblock %}
+
 {% block content %}
 <h1>MVA Data</h1>
+
+
+<!-- Search and Filter Form -->
+<form method="get" action="{{ url_for('view_mva_data') }}">
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="first_name">First Name</label>
+            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ request.args.get('first_name', '') }}">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="last_name">Last Name</label>
+            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ request.args.get('last_name', '') }}">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="school_name">School Name</label>
+            <input type="text" class="form-control" id="school_name" name="school_name" value="{{ request.args.get('school_name', '') }}">
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
 
 <table class="table">
     <thead>
@@ -17,7 +41,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for mva in mva_records %}
+        {% for mva in mva_records.items %}
         <tr>
             <td>{{ mva.student.state_id }}</td>
             <td>{{ mva.student.school.school_name }}</td>
@@ -30,4 +54,50 @@
     </tbody>
 </table>
 
+<!-- Pagination Controls -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        {% if mva_records.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('view_mva_data', page=1, first_name=request.args.get('first_name', ''), last_name=request.args.get('last_name', ''), school_name=request.args.get('school_name', '')) }}">First</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('view_mva_data', page=mva_records.prev_num, first_name=request.args.get('first_name', ''), last_name=request.args.get('last_name', ''), school_name=request.args.get('school_name', '')) }}">Previous</a>
+        </li>
+        {% endif %}
+
+        {% if start_page > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('view_mva_data', page=1, first_name=request.args.get('first_name', ''), last_name=request.args.get('last_name', ''), school_name=request.args.get('school_name', '')) }}">1</a>
+        </li>
+        {% if start_page > 2 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+        {% endif %}
+
+        {% for page_num in range(start_page, end_page + 1) %}
+        <li class="page-item {% if page_num == mva_records.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('view_mva_data', page=page_num, first_name=request.args.get('first_name', ''), last_name=request.args.get('last_name', ''), school_name=request.args.get('school_name', '')) }}">{{ page_num }}</a>
+        </li>
+        {% endfor %}
+
+        {% if end_page < mva_records.pages %}
+        {% if end_page < mva_records.pages - 1 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('view_mva_data', page=mva_records.pages, first_name=request.args.get('first_name', ''), last_name=request.args.get('last_name', ''), school_name=request.args.get('school_name', '')) }}">{{ mva_records.pages }}</a>
+        </li>
+        {% endif %}
+
+        {% if mva_records.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('view_mva_data', page=mva_records.next_num, first_name=request.args.get('first_name', ''), last_name=request.args.get('last_name', ''), school_name=request.args.get('school_name', '')) }}">Next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('view_mva_data', page=mva_records.pages, first_name=request.args.get('first_name', ''), last_name=request.args.get('last_name', ''), school_name=request.args.get('school_name', '')) }}">Last</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
 {% endblock %} 

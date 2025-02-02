@@ -97,9 +97,30 @@ def init_routes(app):
     
     @app.route('/view_mva_data')
     def view_mva_data():
-        """Displays the imported MVA data."""
-        # Fetch all MVA records from the database
-        mva_records = MVA.query.all()
-        
-        return render_template('view_mva_data.html', mva_records=mva_records)
+        """Displays the imported MVA data with search and filter options."""
+        # Get search and filter parameters from the request
+        first_name = request.args.get('first_name', '')
+        last_name = request.args.get('last_name', '')
+        school_name = request.args.get('school_name', '')
+
+        # Build the query
+        query = MVA.query.join(Student).join(School)
+
+        if first_name:
+            query = query.filter(Student.first_name.ilike(f'%{first_name}%'))
+        if last_name:
+            query = query.filter(Student.last_name.ilike(f'%{last_name}%'))
+        if school_name:
+            query = query.filter(School.school_name.ilike(f'%{school_name}%'))
+
+        # Pagination
+        page = request.args.get('page', 1, type=int)
+        per_page = 10  # Number of records per page
+        mva_records = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        # Calculate start and end pages for pagination
+        start_page = max(1, mva_records.page - 2)
+        end_page = min(mva_records.pages, mva_records.page + 2)
+
+        return render_template('view_mva_data.html', mva_records=mva_records, start_page=start_page, end_page=end_page)
 

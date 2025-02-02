@@ -4,6 +4,29 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/table.css') }}">
+<style>
+.mva-summary {
+    font-size: 0.9em;
+}
+
+.mva-counts .badge {
+    margin-right: 0.5rem;
+}
+
+.mva-types {
+    color: #666;
+}
+
+.mva-types i {
+    width: 16px;
+    text-align: center;
+    margin-right: 4px;
+}
+
+.icon-green { color: #28a745; }
+.icon-yellow { color: #ffc107; }
+.icon-red { color: #dc3545; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -79,11 +102,16 @@
                     Grade Year
                 </a>
             </th>
-            <th>
-                <a href="{{ url_for('view_mva_data', page=1, full_name=request.args.get('full_name', ''), school_name=request.args.get('school_name', ''), results_per_page=request.args.get('results_per_page', 10), sort_by='description', sort_order='asc' if sort_by != 'description' or sort_order == 'desc' else 'desc') }}">
-                    MVA Progress
+            <th scope="col">
+                <a href="{{ url_for('view_mva_data', sort_by='description', sort_order='desc' if sort_by == 'description' and sort_order == 'asc' else 'asc', full_name=request.args.get('full_name', ''), school_name=request.args.get('school_name', ''), mva_status=request.args.get('mva_status', ''), results_per_page=request.args.get('results_per_page', 10)) }}">
+                    MVA Status
+                    {% if sort_by == 'description' %}
+                    <i class="fas fa-sort-{{ 'down' if sort_order == 'desc' else 'up' }}"></i>
+                    {% endif %}
                 </a>
             </th>
+            <!-- Add new MVA Progress Summary column -->
+            <th scope="col">MVA Progress Summary</th>
         </tr>
     </thead>
     <tbody id="mvaTableBody">
@@ -107,6 +135,57 @@
                 {% else %}
                     {{ mva.description }}
                 {% endif %}
+            </td>
+            <td>
+                <div class="mva-summary">
+                    <!-- MVA Count Badges -->
+                    <div class="mva-counts mb-2">
+                        {% if mva.student.total_mvas_completed > 0 %}
+                            <span class="badge bg-success">{{ mva.student.total_mvas_completed }} Completed</span>
+                        {% endif %}
+                        {% if mva.student.mvas_in_progress > 0 %}
+                            <span class="badge bg-warning">{{ mva.student.mvas_in_progress }} In Progress</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- MVA Type Progress -->
+                    <div class="mva-types small">
+                        {% if mva.student.dual_credit %}
+                            <div class="mb-1">
+                                <i class="fas fa-graduation-cap"></i> Dual Credit: 
+                                {% if mva.student.dual_credit.college_credits > 0 %}
+                                    {{ mva.student.dual_credit.college_credits }}/{{ mva.student.dual_credit.target_credits }} credits
+                                {% else %}
+                                    Not Started
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        {% if mva.student.cte %}
+                            <div class="mb-1">
+                                <i class="fas fa-tools"></i> CTE: 
+                                {% if mva.student.cte.total_credits > 0 %}
+                                    {{ mva.student.cte.total_credits }}/{{ mva.student.cte.target_credits }} credits
+                                {% else %}
+                                    Not Started
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        {% if mva.student.internship %}
+                            <div class="mb-1">
+                                <i class="fas fa-briefcase"></i> Internship: 
+                                {% if mva.student.internship.placement_confirmed %}
+                                    Placement Confirmed
+                                {% elif mva.student.internship.program_name %}
+                                    {{ mva.student.internship.program_name }}
+                                {% else %}
+                                    Not Started
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
             </td>
         </tr>
         {% endfor %}

@@ -107,7 +107,9 @@ def init_routes(app):
         results_per_page = request.args.get('results_per_page', 10, type=int)  # Default results per page
 
         # Build the query
-        query = MVA.query.join(Student).join(School)
+        query = MVA.query.join(Student).join(School).options(
+            db.joinedload(MVA.student).joinedload(Student.mvas)
+        )
 
         if full_name:
             # Split the full name into first and last name
@@ -158,5 +160,29 @@ def init_routes(app):
         start_page = max(1, mva_records.page - 2)
         end_page = min(mva_records.pages, mva_records.page + 2)
 
-        return render_template('view_mva_data.html', mva_records=mva_records, start_page=start_page, end_page=end_page, schools=schools, sort_by=sort_by, sort_order=sort_order)
+        # Process MVA data for each student
+        for record in mva_records.items:
+            student = record.student
+            
+            # Calculate total completed MVAs
+            student.total_mvas_completed = sum(
+                1 for mva in student.mvas 
+                if 'completed' in (mva.description or '').lower()
+            )
+            
+            # Calculate MVAs in progress
+            student.mvas_in_progress = sum(
+                1 for mva in student.mvas 
+                if 'working on' in (mva.description or '').lower()
+            )
+
+        return render_template(
+            'view_mva_data.html',
+            mva_records=mva_records,
+            start_page=start_page,
+            end_page=end_page,
+            schools=schools,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
 

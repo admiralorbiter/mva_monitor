@@ -186,3 +186,41 @@ def init_routes(app):
             sort_order=sort_order
         )
 
+    @app.route('/student/<int:student_id>')
+    def student_detail(student_id: int):
+        """Display detailed MVA information for a specific student.
+        
+        Args:
+            student_id: The unique identifier for the student
+            
+        Returns:
+            Rendered template with student's detailed MVA information
+        """
+        # Get student with all related data
+        student = Student.query.options(
+            db.joinedload(Student.school),
+            db.joinedload(Student.mvas)
+        ).get_or_404(student_id)
+        
+        # Calculate MVA statistics
+        mva_stats = {
+            'total_completed': sum(1 for mva in student.mvas if 'completed' in (mva.description or '').lower()),
+            'total_in_progress': sum(1 for mva in student.mvas if 'working on' in (mva.description or '').lower()),
+            'cte_credits': sum(
+                float(mva.hours_earned or 0) 
+                for mva in student.mvas 
+                if mva.mva_type == 'CTE'
+            ),
+            'dual_credits': sum(
+                float(mva.hours_earned or 0) 
+                for mva in student.mvas 
+                if mva.mva_type == 'College Credits'
+            )
+        }
+        
+        return render_template(
+            'student_detail.html',
+            student=student,
+            mva_stats=mva_stats
+        )
+

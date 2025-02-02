@@ -26,6 +26,11 @@
 .icon-green { color: #28a745; }
 .icon-yellow { color: #ffc107; }
 .icon-red { color: #dc3545; }
+
+.student-row:hover {
+    background-color: rgba(0,0,0,0.05);
+    transition: background-color 0.2s ease;
+}
 </style>
 {% endblock %}
 
@@ -116,7 +121,7 @@
     </thead>
     <tbody id="mvaTableBody">
         {% for mva in mva_records.items %}
-        <tr>
+        <tr class="student-row" onclick="window.location.href='{{ url_for('student_detail', student_id=mva.student.id) }}';" style="cursor: pointer;">
             <td>{{ mva.student.state_id }}</td>
             <td>{{ mva.student.school.school_name }}</td>
             <td>{{ mva.student.first_name }}</td>

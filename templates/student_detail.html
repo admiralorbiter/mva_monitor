@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.first_name }} {{ student.last_name }} - MVA Details{% endblock %}
+
+{% block extra_css %}
+<style>
+.progress {
+    height: 25px;
+}
+
+.mva-card {
+    transition: transform 0.2s;
+}
+
+.mva-card:hover {
+    transform: translateY(-5px);
+}
+
+.status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.mva-icon {
+    font-size: 2em;
+    margin-bottom: 15px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Back button -->
+    <a href="{{ url_for('view_mva_data') }}" class="btn btn-outline-primary mb-3">
+        <i class="fas fa-arrow-left"></i> Back to MVA Data
+    </a>
+
+    <!-- Student Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1>{{ student.first_name }} {{ student.last_name }}</h1>
+            <p class="lead">
+                {{ student.school.school_name }} | Grade Year: {{ student.grade_year }}
+                <br>
+                State ID: {{ student.state_id }} | District ID: {{ student.school_district_id }}
+            </p>
+        </div>
+    </div>
+
+    <!-- MVA Progress Overview -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">MVA Progress</h5>
+                    <div class="progress mb-3">
+                        {% set progress = (mva_stats.total_completed / 3.0) * 100 %}
+                        <div class="progress-bar bg-success" 
+                             role="progressbar" 
+                             style="width: {{ progress }}%"
+                             aria-valuenow="{{ progress }}"
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ mva_stats.total_completed }}/3 MVAs Completed
+                        </div>
+                    </div>
+                    <p class="card-text">
+                        <span class="badge bg-success">{{ mva_stats.total_completed }} Completed</span>
+                        <span class="badge bg-warning ms-2">{{ mva_stats.total_in_progress }} In Progress</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual MVA Type Cards -->
+    <div class="row">
+        <!-- CTE MVA Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card mva-card h-100">
+                <div class="card-body">
+                    <div class="text-center mva-icon">
+                        <i class="fas fa-tools text-primary"></i>
+                    </div>
+                    <h5 class="card-title">Career & Technical Education (CTE)</h5>
+                    <p class="card-text">
+                        Credits Earned: {{ mva_stats.cte_credits }}/3.0
+                    </p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" 
+                             role="progressbar" 
+                             style="width: {{ (mva_stats.cte_credits / 3.0) * 100 }}%">
+                        </div>
+                    </div>
+                    {% for mva in student.mvas if mva.mva_type == 'CTE' %}
+                    <div class="mb-2">
+                        <small class="text-muted">{{ mva.description }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Dual Credit MVA Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card mva-card h-100">
+                <div class="card-body">
+                    <div class="text-center mva-icon">
+                        <i class="fas fa-graduation-cap text-success"></i>
+                    </div>
+                    <h5 class="card-title">Dual Credit</h5>
+                    <p class="card-text">
+                        Credits Earned: {{ mva_stats.dual_credits }}/9.0
+                    </p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" 
+                             role="progressbar" 
+                             style="width: {{ (mva_stats.dual_credits / 9.0) * 100 }}%">
+                        </div>
+                    </div>
+                    {% for mva in student.mvas if mva.mva_type == 'College Credits' %}
+                    <div class="mb-2">
+                        <small class="text-muted">{{ mva.description }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Internship MVA Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card mva-card h-100">
+                <div class="card-body">
+                    <div class="text-center mva-icon">
+                        <i class="fas fa-briefcase text-warning"></i>
+                    </div>
+                    <h5 class="card-title">Internship</h5>
+                    {% for mva in student.mvas if mva.mva_type == 'Internship' %}
+                    <div class="mb-2">
+                        <small class="text-muted">{{ mva.description }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

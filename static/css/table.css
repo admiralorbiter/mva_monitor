@@ -86,3 +86,20 @@
 .btn-primary:hover {
     background-color: var(--redwood);
 }
+
+/* Icon Styles */
+.icon-green {
+    color: green;
+}
+
+.icon-yellow {
+    color: #FFC107; /* A softer yellow that fits better */
+}
+
+.icon-red {
+    color: red;
+}
+
+.icon-green, .icon-yellow, .icon-red {
+    margin-right: 5px; /* Space between icon and text */
+}

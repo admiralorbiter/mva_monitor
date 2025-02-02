@@ -52,7 +52,20 @@
             <td>{{ mva.student.first_name }}</td>
             <td>{{ mva.student.last_name }}</td>
             <td>{{ mva.student.grade_year }}</td>
-            <td>{{ mva.description }}</td>
+            <td>
+                {% if 'completed' in mva.description %}
+                    <i class="fas fa-check-circle icon-green" title="{{ mva.description }}"></i> 
+                    {{ mva.description }}
+                {% elif 'working on CTE' in mva.description %}
+                    <i class="fas fa-exclamation-circle icon-yellow" title="{{ mva.description }}"></i> 
+                    {{ mva.description }}
+                {% elif 'no known' in mva.description %}
+                    <i class="fas fa-times-circle icon-red" title="{{ mva.description }}"></i> 
+                    {{ mva.description }}
+                {% else %}
+                    {{ mva.description }}
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>

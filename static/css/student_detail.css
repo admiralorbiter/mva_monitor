@@ -1,0 +1,146 @@
+/* Card and Layout Styles */
+.student-header {
+    background: var(--dark-purple);
+    color: var(--pale-dogwood);
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.student-info {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.progress {
+    height: 25px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+    position: relative;
+}
+
+.progress-label {
+    position: absolute;
+    right: 10px;
+    color: white;
+    font-weight: 500;
+}
+
+.mva-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+.mva-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.mva-card .card-body {
+    padding: 1.5rem;
+}
+
+.mva-icon {
+    font-size: 2.5em;
+    margin-bottom: 1rem;
+    color: var(--dark-purple);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.status-not-started {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-in-progress {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+/* Course List Styles */
+.course-list {
+    margin-top: 1rem;
+    padding-left: 0;
+    list-style: none;
+}
+
+.course-item {
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+}
+
+.course-item:last-child {
+    border-bottom: none;
+}
+
+/* Description Box */
+.description-box {
+    background-color: rgba(0,0,0,0.05);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+}
+
+/* Back Button */
+.back-button {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.back-button:hover {
+    transform: translateX(-5px);
+}
+
+/* Add these styles to your existing CSS */
+.mva-status-details {
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.mva-status-item {
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.mva-status-item:last-child {
+    border-bottom: none;
+}
+
+.mva-status-item i {
+    margin-right: 0.5rem;
+    width: 20px;
+}
+
+.icon-green { color: #28a745; }
+.icon-yellow { color: #ffc107; }
+.icon-red { color: #dc3545; }

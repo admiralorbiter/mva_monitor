@@ -2,7 +2,7 @@ import pandas as pd
 from flask import flash, redirect, render_template, url_for, request
 from flask_login import login_required, login_user, logout_user
 from forms import LoginForm
-from models import MVA, MVAStatus, School, Student, User, db
+from models import CTEMVA, MVA, DualCreditMVA, InternshipMVA, MVAStatus, School, Student, StudentMVA, User, db
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -202,25 +202,93 @@ def init_routes(app):
             db.joinedload(Student.mvas)
         ).get_or_404(student_id)
         
-        # Calculate MVA statistics
+        # Create StudentMVA instance for comprehensive tracking
+        student_mva = StudentMVA(
+            student_id=student.state_id,
+            grad_year=student.grade_year
+        )
+        
+        # Process CTE MVAs
+        cte_courses = {}
+        cte_status = MVAStatus.NOT_STARTED
+        for mva in student.mvas:
+            if mva.mva_type == 'CTE':
+                if mva.hours_earned:
+                    cte_courses[mva.description] = float(mva.hours_earned)
+                if 'working on' in (mva.description or '').lower():
+                    cte_status = MVAStatus.IN_PROGRESS
+                elif 'completed' in (mva.description or '').lower():
+                    cte_status = MVAStatus.COMPLETED
+        
+        student_mva.cte = CTEMVA(
+            cte_courses=cte_courses,
+            total_credits=sum(cte_courses.values()),
+            status=cte_status
+        )
+        
+        # Process Dual Credit MVAs
+        dual_credit_courses = []
+        college_credits = 0
+        dc_status = MVAStatus.NOT_STARTED
+        for mva in student.mvas:
+            if mva.mva_type == 'College Credits':
+                if mva.description:
+                    dual_credit_courses.append(mva.description)
+                if mva.hours_earned:
+                    college_credits += float(mva.hours_earned)
+                if 'working on' in (mva.description or '').lower():
+                    dc_status = MVAStatus.IN_PROGRESS
+                elif 'completed' in (mva.description or '').lower():
+                    dc_status = MVAStatus.COMPLETED
+        
+        student_mva.dual_credit = DualCreditMVA(
+            enrolled_eca='Early College Academy' in ' '.join(dual_credit_courses),
+            dual_credit_courses=dual_credit_courses,
+            college_credits=college_credits,
+            status=dc_status
+        )
+        
+        # Process Internship MVAs
+        internship_status = MVAStatus.NOT_STARTED
+        program_name = None
+        placement_confirmed = False
+        for mva in student.mvas:
+            if mva.mva_type == 'Internship':
+                if 'ProX' in (mva.description or ''):
+                    program_name = 'ProX'
+                if 'placement confirmed' in (mva.description or '').lower():
+                    placement_confirmed = True
+                if 'working on' in (mva.description or '').lower():
+                    internship_status = MVAStatus.IN_PROGRESS
+                elif 'completed' in (mva.description or '').lower():
+                    internship_status = MVAStatus.COMPLETED
+        
+        student_mva.internship = InternshipMVA(
+            program_name=program_name,
+            status=internship_status,
+            placement_confirmed=placement_confirmed
+        )
+        
+        # Calculate overall MVA statistics
         mva_stats = {
             'total_completed': sum(1 for mva in student.mvas if 'completed' in (mva.description or '').lower()),
             'total_in_progress': sum(1 for mva in student.mvas if 'working on' in (mva.description or '').lower()),
-            'cte_credits': sum(
-                float(mva.hours_earned or 0) 
-                for mva in student.mvas 
-                if mva.mva_type == 'CTE'
-            ),
-            'dual_credits': sum(
-                float(mva.hours_earned or 0) 
-                for mva in student.mvas 
-                if mva.mva_type == 'College Credits'
-            )
+            'cte_credits': student_mva.cte.total_credits,
+            'dual_credits': student_mva.dual_credit.college_credits,
+            'enrolled_eca': student_mva.dual_credit.enrolled_eca,
+            'internship_program': student_mva.internship.program_name,
+            'internship_confirmed': student_mva.internship.placement_confirmed,
+            'cte_status': student_mva.cte.status,
+            'dual_credit_status': student_mva.dual_credit.status,
+            'internship_status': student_mva.internship.status,
+            'cte_courses': student_mva.cte.cte_courses,
+            'dual_credit_courses': student_mva.dual_credit.dual_credit_courses
         }
         
         return render_template(
             'student_detail.html',
             student=student,
-            mva_stats=mva_stats
+            mva_stats=mva_stats,
+            student_mva=student_mva
         )
 

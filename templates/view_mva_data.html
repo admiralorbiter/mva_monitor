@@ -9,24 +9,28 @@
 {% block content %}
 <h1>MVA Data</h1>
 
-
 <!-- Search and Filter Form -->
-<form method="get" action="{{ url_for('view_mva_data') }}">
-    <div class="form-row">
-        <div class="form-group col-md-4">
-            <label for="first_name">First Name</label>
-            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ request.args.get('first_name', '') }}">
+<form method="get" action="{{ url_for('view_mva_data') }}" class="mb-4">
+    <div class="form-row align-items-end">
+        <div class="form-group col-md-4 col-lg-3">
+            <label for="full_name">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Enter full name" value="{{ request.args.get('full_name', '') }}">
         </div>
-        <div class="form-group col-md-4">
-            <label for="last_name">Last Name</label>
-            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ request.args.get('last_name', '') }}">
-        </div>
-        <div class="form-group col-md-4">
+        <div class="form-group col-md-4 col-lg-3">
             <label for="school_name">School Name</label>
-            <input type="text" class="form-control" id="school_name" name="school_name" value="{{ request.args.get('school_name', '') }}">
+            <select class="form-control" id="school_name" name="school_name">
+                <option value="">Select a School</option>
+                {% for school in schools %}
+                <option value="{{ school.school_name }}" {% if school.school_name == request.args.get('school_name', '') %}selected{% endif %}>
+                    {{ school.school_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group col-md-4 col-lg-2">
+            <button type="submit" class="btn btn-primary btn-block">Search</button>
         </div>
     </div>
-    <button type="submit" class="btn btn-primary">Search</button>
 </form>
 
 <table class="table">

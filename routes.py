@@ -99,19 +99,27 @@ def init_routes(app):
     def view_mva_data():
         """Displays the imported MVA data with search and filter options."""
         # Get search and filter parameters from the request
-        first_name = request.args.get('first_name', '')
-        last_name = request.args.get('last_name', '')
+        full_name = request.args.get('full_name', '')
         school_name = request.args.get('school_name', '')
 
         # Build the query
         query = MVA.query.join(Student).join(School)
 
-        if first_name:
-            query = query.filter(Student.first_name.ilike(f'%{first_name}%'))
-        if last_name:
-            query = query.filter(Student.last_name.ilike(f'%{last_name}%'))
+        if full_name:
+            # Split the full name into first and last name
+            names = full_name.split()
+            if len(names) > 0:
+                first_name = names[0]
+                query = query.filter(Student.first_name.ilike(f'%{first_name}%'))
+            if len(names) > 1:
+                last_name = names[1]
+                query = query.filter(Student.last_name.ilike(f'%{last_name}%'))
+
         if school_name:
             query = query.filter(School.school_name.ilike(f'%{school_name}%'))
+
+        # Fetch the list of schools for the dropdown
+        schools = School.query.all()
 
         # Pagination
         page = request.args.get('page', 1, type=int)
@@ -122,5 +130,5 @@ def init_routes(app):
         start_page = max(1, mva_records.page - 2)
         end_page = min(mva_records.pages, mva_records.page + 2)
 
-        return render_template('view_mva_data.html', mva_records=mva_records, start_page=start_page, end_page=end_page)
+        return render_template('view_mva_data.html', mva_records=mva_records, start_page=start_page, end_page=end_page, schools=schools)
 

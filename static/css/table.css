@@ -53,3 +53,36 @@
     color: var(--pale-dogwood);
     border: 1px solid var(--dark-purple);
 }
+
+/* Form Styles */
+.form-control {
+    border-radius: 5px;
+    border: 1px solid var(--raisin-black);
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--dark-purple);
+    box-shadow: 0 0 5px rgba(55, 37, 73, 0.5);
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.form-group {
+    margin-bottom: 1rem; /* Adjust spacing as needed */
+}
+
+.btn-primary {
+    background-color: var(--dark-purple);
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--redwood);
+}

@@ -14,6 +14,7 @@
 .table th {
     background-color: var(--dark-purple);
     color: var(--pale-dogwood);
+    cursor: pointer; /* Change cursor to pointer for clickable headers */
 }
 
 .table tr:nth-child(even) {

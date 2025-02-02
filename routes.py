@@ -101,6 +101,8 @@ def init_routes(app):
         # Get search and filter parameters from the request
         full_name = request.args.get('full_name', '')
         school_name = request.args.get('school_name', '')
+        sort_by = request.args.get('sort_by', 'state_id')  # Default sort by State ID
+        sort_order = request.args.get('sort_order', 'asc')  # Default sort order
 
         # Build the query
         query = MVA.query.join(Student).join(School)
@@ -118,6 +120,23 @@ def init_routes(app):
         if school_name:
             query = query.filter(School.school_name.ilike(f'%{school_name}%'))
 
+        # Apply sorting based on the model
+        if sort_by in ['state_id', 'first_name', 'last_name', 'grade_year']:
+            if sort_order == 'asc':
+                query = query.order_by(getattr(Student, sort_by).asc())
+            else:
+                query = query.order_by(getattr(Student, sort_by).desc())
+        elif sort_by == 'school_name':
+            if sort_order == 'asc':
+                query = query.order_by(School.school_name.asc())
+            else:
+                query = query.order_by(School.school_name.desc())
+        else:
+            if sort_order == 'asc':
+                query = query.order_by(getattr(MVA, sort_by).asc())
+            else:
+                query = query.order_by(getattr(MVA, sort_by).desc())
+
         # Fetch the list of schools for the dropdown
         schools = School.query.all()
 
@@ -130,5 +149,5 @@ def init_routes(app):
         start_page = max(1, mva_records.page - 2)
         end_page = min(mva_records.pages, mva_records.page + 2)
 
-        return render_template('view_mva_data.html', mva_records=mva_records, start_page=start_page, end_page=end_page, schools=schools)
+        return render_template('view_mva_data.html', mva_records=mva_records, start_page=start_page, end_page=end_page, schools=schools, sort_by=sort_by, sort_order=sort_order)
 

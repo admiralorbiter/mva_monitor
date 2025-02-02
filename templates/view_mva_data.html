@@ -36,15 +36,39 @@
 <table class="table">
     <thead>
         <tr>
-            <th>State ID</th>
-            <th>School Name</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Grade Year</th>
-            <th>MVA Progress</th>
+            <th>
+                <a href="{{ url_for('view_mva_data', page=1, full_name=request.args.get('full_name', ''), school_name=request.args.get('school_name', ''), sort_by='state_id', sort_order='asc' if sort_by != 'state_id' or sort_order == 'desc' else 'desc') }}">
+                    State ID
+                </a>
+            </th>
+            <th>
+                <a href="{{ url_for('view_mva_data', page=1, full_name=request.args.get('full_name', ''), school_name=request.args.get('school_name', ''), sort_by='school_name', sort_order='asc' if sort_by != 'school_name' or sort_order == 'desc' else 'desc') }}">
+                    School Name
+                </a>
+            </th>
+            <th>
+                <a href="{{ url_for('view_mva_data', page=1, full_name=request.args.get('full_name', ''), school_name=request.args.get('school_name', ''), sort_by='first_name', sort_order='asc' if sort_by != 'first_name' or sort_order == 'desc' else 'desc') }}">
+                    First Name
+                </a>
+            </th>
+            <th>
+                <a href="{{ url_for('view_mva_data', page=1, full_name=request.args.get('full_name', ''), school_name=request.args.get('school_name', ''), sort_by='last_name', sort_order='asc' if sort_by != 'last_name' or sort_order == 'desc' else 'desc') }}">
+                    Last Name
+                </a>
+            </th>
+            <th>
+                <a href="{{ url_for('view_mva_data', page=1, full_name=request.args.get('full_name', ''), school_name=request.args.get('school_name', ''), sort_by='grade_year', sort_order='asc' if sort_by != 'grade_year' or sort_order == 'desc' else 'desc') }}">
+                    Grade Year
+                </a>
+            </th>
+            <th>
+                <a href="{{ url_for('view_mva_data', page=1, full_name=request.args.get('full_name', ''), school_name=request.args.get('school_name', ''), sort_by='description', sort_order='asc' if sort_by != 'description' or sort_order == 'desc' else 'desc') }}">
+                    MVA Progress
+                </a>
+            </th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="mvaTableBody">
         {% for mva in mva_records.items %}
         <tr>
             <td>{{ mva.student.state_id }}</td>
@@ -117,4 +141,29 @@
         {% endif %}
     </ul>
 </nav>
+
+<script>
+function sortTable(columnIndex) {
+    const table = document.querySelector('.table');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const isAscending = tbody.dataset.sortOrder === 'asc';
+
+    rows.sort((a, b) => {
+        const aText = a.children[columnIndex].innerText;
+        const bText = b.children[columnIndex].innerText;
+
+        return isAscending 
+            ? aText.localeCompare(bText) 
+            : bText.localeCompare(aText);
+    });
+
+    // Clear the existing rows and append the sorted rows
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Toggle sort order
+    tbody.dataset.sortOrder = isAscending ? 'desc' : 'asc';
+}
+</script>
 {% endblock %} 

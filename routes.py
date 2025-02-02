@@ -101,6 +101,7 @@ def init_routes(app):
         # Get search and filter parameters from the request
         full_name = request.args.get('full_name', '')
         school_name = request.args.get('school_name', '')
+        mva_status = request.args.get('mva_status', '')  # Get the MVA status filter
         sort_by = request.args.get('sort_by', 'state_id')  # Default sort by State ID
         sort_order = request.args.get('sort_order', 'asc')  # Default sort order
         results_per_page = request.args.get('results_per_page', 10, type=int)  # Default results per page
@@ -120,6 +121,14 @@ def init_routes(app):
 
         if school_name:
             query = query.filter(School.school_name.ilike(f'%{school_name}%'))
+
+        # Filter by MVA status
+        if mva_status == 'completed':
+            query = query.filter(MVA.description.ilike('%completed%'))
+        elif mva_status == 'in_progress':
+            query = query.filter(MVA.description.ilike('%working on%'))
+        elif mva_status == 'not_started':
+            query = query.filter(MVA.description.ilike('%no known%'))
 
         # Apply sorting based on the model
         if sort_by in ['state_id', 'first_name', 'last_name', 'grade_year']:

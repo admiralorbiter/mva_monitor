@@ -3,7 +3,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
 from flask_login import UserMixin
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional, Dict
 from enum import Enum
 
@@ -59,9 +59,16 @@ class MVA(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
-    mva_type = db.Column(db.String(64), nullable=False)  # e.g., 'Internship', 'Client Project', 'College Credits', 'IRC', 'Entrepreneurial Experience'
-    description = db.Column(db.String(256), nullable=True)  # Optional description of the MVA
-    hours_earned = db.Column(db.Integer, nullable=True)  # Number of hours earned, if applicable
+    mva_type = db.Column(db.String(64), nullable=False)  # e.g., 'CTE', 'Internship', 'Dual Credit'
+    description = db.Column(db.String(256), nullable=True)  # Progress description
+    hours_earned = db.Column(db.Float, nullable=True)  # Changed to Float for CTE credits
+    
+    # New fields for CTE tracking
+    courses_2023 = db.Column(db.JSON, nullable=True)  # Store course data as JSON
+    courses_2024 = db.Column(db.JSON, nullable=True)  # Store course data as JSON
+    action_items = db.Column(db.JSON, nullable=True)  # Store action items as JSON list
+    staff_notes = db.Column(db.Text, nullable=True)  # Staff notes as text
+    status = db.Column(db.String(64), nullable=True)  # Store MVAStatus value
 
     student = db.relationship('Student', backref='mvas', lazy=True)
 
@@ -96,18 +103,21 @@ class CTEMVA:
     """Tracks Career & Technical Education progress.
     
     Attributes:
-        cte_courses: Dict mapping course names to credits earned
-        total_credits: Total CTE credits earned
-        target_credits: Credits needed for MVA completion
-        status: Current MVA completion status
+        cte_courses (dict): Mapping of course names to credits earned
+        total_credits (float): Total CTE credits earned
+        status (MVAStatus): Current status of CTE progress
+        courses_2023 (dict): CTE courses and credits from 2023
+        courses_2024 (dict): CTE courses and credits from 2024
+        action_items (list[str]): Required actions for progress
+        staff_notes (str): Additional notes from staff
     """
-    cte_courses: Dict[str, float] = None
-    total_credits: float = 0
-    target_credits: float = 3.0
+    cte_courses: dict = field(default_factory=dict)
+    total_credits: float = 0.0
     status: MVAStatus = MVAStatus.NOT_STARTED
-    
-    def __post_init__(self):
-        self.cte_courses = self.cte_courses or {}
+    courses_2023: dict = field(default_factory=dict)
+    courses_2024: dict = field(default_factory=dict)
+    action_items: list[str] = field(default_factory=list)
+    staff_notes: str = ""
 
 @dataclass
 class InternshipMVA:

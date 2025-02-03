@@ -39,61 +39,118 @@ def init_routes(app):
     @app.route('/import_mva_data', methods=['POST'])
     def import_mva_data():
         """Imports MVA data from a CSV file."""
-        csv_path = 'data/mva.csv'  # Ensure this path is correct
+        csv_path = 'data/mva.csv'
         try:
-            df = pd.read_csv(csv_path)  # Read the CSV file
+            df = pd.read_csv(csv_path)
+            total_rows = len(df)
+            print(f"Starting import of {total_rows} rows from {csv_path}.")
             
-            for _, row in df.iterrows():
-                # Ensure School exists
-                school = School.query.filter_by(school_name=row['SchoolName']).first()
-                if not school:
-                    school = School(school_name=row['SchoolName'], district_name="Unknown")
-                    db.session.add(school)
+            success_count = 0
+            error_count = 0
+
+            for index, row in df.iterrows():
+                try:
+                    # Print progress every 100 rows
+                    if index % 100 == 0:
+                        print(f"Processing row {index + 1} of {total_rows}...")
+                        print(f"Successes: {success_count}, Errors: {error_count}")
+
+                    # Ensure School exists
+                    school = School.query.filter_by(school_name=row['SchoolName']).first()
+                    if not school:
+                        school = School(school_name=row['SchoolName'], district_name="Unknown")
+                        db.session.add(school)
+                        db.session.commit()
+                    
+                    # Ensure Student exists
+                    student = Student.query.filter_by(state_id=row['state ID']).first()
+                    if not student:
+                        student = Student(
+                            state_id=row['state ID'],
+                            school_district_id=row['KCPS ID'],
+                            first_name=row['First name'],
+                            last_name=row['Last name'],
+                            grade_year=row['grad year'],
+                            school_id=school.id
+                        )
+                        db.session.add(student)
+                        db.session.commit()
+                    
+                    # Process CTE courses and credits
+                    cte_courses_2023 = {}
+                    cte_courses_2024 = {}
+                    
+                    # Get 2023 courses and credits
+                    for i in range(1, 5):
+                        course = row.get(f'coursename{i}')
+                        if pd.notna(course) and course != '0':
+                            cte_courses_2023[course] = 0.5
+                    
+                    # Get 2024 courses and credits
+                    for i in range(1, 5):
+                        course = row.get(f'coursename{i}')
+                        if pd.notna(course) and course != '0':
+                            cte_courses_2024[course] = 0.5
+                    
+                    # Calculate total credits
+                    total_credits = float(row.get('total credits CTE 23&24', 0))
+                    
+                    # Determine MVA status and action items
+                    status = MVAStatus.NOT_STARTED.value
+                    action_items = []
+                    
+                    if pd.notna(row['Action']):
+                        action_items.append(row['Action'])
+                    if pd.notna(row['Action 2']):
+                        action_items.append(row['Action 2'])
+                    
+                    if "working on CTE" in str(row['MVA progress']):
+                        status = MVAStatus.IN_PROGRESS.value
+                    elif "completed" in str(row['MVA progress']):
+                        status = MVAStatus.COMPLETED.value
+                    
+                    # Create or update MVA
+                    mva = MVA.query.filter_by(student_id=student.id, mva_type='CTE').first()
+                    if not mva:
+                        mva = MVA(
+                            student_id=student.id,
+                            mva_type='CTE',
+                            description=row['MVA progress'],
+                            hours_earned=total_credits,
+                            courses_2023=cte_courses_2023,
+                            courses_2024=cte_courses_2024,
+                            action_items=action_items,
+                            staff_notes=row.get('Staff notes', ''),
+                            status=status
+                        )
+                        db.session.add(mva)
+                    else:
+                        mva.description = row['MVA progress']
+                        mva.hours_earned = total_credits
+                        mva.courses_2023 = cte_courses_2023
+                        mva.courses_2024 = cte_courses_2024
+                        mva.action_items = action_items
+                        mva.staff_notes = row.get('Staff notes', '')
+                        mva.status = status
+                    
                     db.session.commit()
-                
-                # Ensure Student exists
-                student = Student.query.filter_by(state_id=row['state ID']).first()
-                if not student:
-                    student = Student(
-                        state_id=row['state ID'],
-                        school_district_id=row['KCPS ID'],
-                        first_name=row['First name'],
-                        last_name=row['Last name'],
-                        grade_year=row['grad year'],
-                        school_id=school.id
-                    )
-                    db.session.add(student)
-                else:
-                    student.school_district_id = row['KCPS ID']
-                    student.first_name = row['First name']
-                    student.last_name = row['Last name']
-                    student.grade_year = row['grad year']
-                    student.school_id = school.id
-                
-                db.session.commit()
-                
-                # Determine MVA status
-                mva_status = MVAStatus.NOT_STARTED
-                if "working on CTE" in str(row['MVA progress']):
-                    mva_status = MVAStatus.IN_PROGRESS
-                elif "completed" in str(row['MVA progress']):
-                    mva_status = MVAStatus.COMPLETED
-                
-                # Create or update MVA
-                mva = MVA.query.filter_by(student_id=student.id, mva_type='CTE').first()
-                if not mva:
-                    mva = MVA(student_id=student.id, mva_type='CTE', description=row['MVA progress'])
-                    db.session.add(mva)
-                else:
-                    mva.description = row['MVA progress']
-                
-                db.session.commit()
+                    success_count += 1
+                    
+                except Exception as row_error:
+                    error_count += 1
+                    print(f"Error processing row {index + 1}: {str(row_error)}")
+                    db.session.rollback()
+                    continue
+
+            print(f"Import completed. Processed {total_rows} rows.")
+            print(f"Successes: {success_count}, Errors: {error_count}")
+            flash(f'MVA data imported successfully! ({success_count} successes, {error_count} errors)', 'success')
             
-            flash('MVA data imported successfully!', 'success')
         except Exception as e:
+            print(f"Fatal error during import: {str(e)}")
             flash(f'An error occurred while importing MVA data: {str(e)}', 'danger')
         
-        return redirect(url_for('admin'))  # Redirect back to the admin page
+        return redirect(url_for('admin'))
     
     @app.route('/view_mva_data')
     def view_mva_data():

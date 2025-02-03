@@ -144,3 +144,50 @@
 .icon-green { color: #28a745; }
 .icon-yellow { color: #ffc107; }
 .icon-red { color: #dc3545; }
+
+/* Add these new styles to your existing CSS */
+
+.action-items {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border-radius: 8px;
+}
+
+.action-item {
+    display: flex;
+    align-items: start;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.action-item:last-child {
+    border-bottom: none;
+}
+
+.action-item i {
+    color: #856404;
+    margin-top: 0.2rem;
+}
+
+.staff-notes {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #e2e3e5;
+    border-radius: 8px;
+    color: #383d41;
+}
+
+.year-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: rgba(0,0,0,0.03);
+    border-radius: 8px;
+}
+
+.year-header {
+    font-weight: 600;
+    color: var(--dark-purple);
+    margin-bottom: 1rem;
+}

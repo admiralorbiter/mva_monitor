@@ -71,27 +71,72 @@
                     </div>
                     <h5 class="card-title text-center">Career & Technical Education (CTE)</h5>
                     
-                    <div class="status-badge {{ mva_stats.cte_status|lower }}">
-                        Status: {{ mva_stats.cte_status }}
-                    </div>
-                    
-                    <p class="card-text">Credits: {{ mva_stats.cte_credits }}/3.0</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar" 
-                             role="progressbar" 
-                             style="width: {{ (mva_stats.cte_credits / 3.0) * 100 }}%">
+                    {% for mva in student.mvas if mva.mva_type == 'CTE' %}
+                        <div class="status-badge status-{{ mva.status|lower|replace(' ', '-') }}">
+                            {{ mva.status }}
                         </div>
-                    </div>
-                    
-                    <h6 class="mt-4">Courses:</h6>
-                    <ul class="course-list">
-                        {% for course, credits in mva_stats.cte_courses.items() %}
-                        <li class="course-item">
-                            <span>{{ course }}</span>
-                            <span class="badge bg-primary">{{ credits }} credits</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                        
+                        <p class="card-text">Credits Earned: {{ mva.hours_earned|default(0, true) }}/3.0</p>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" 
+                                 role="progressbar" 
+                                 style="width: {{ (mva.hours_earned|default(0, true) / 3.0) * 100 }}%">
+                            </div>
+                        </div>
+
+                        <!-- 2023 Courses -->
+                        <div class="year-section">
+                            <div class="year-header">2023 Courses</div>
+                            <ul class="course-list">
+                                {% if mva.courses_2023 %}
+                                    {% for course, credits in mva.courses_2023.items() %}
+                                        <li class="course-item">
+                                            <span>{{ course }}</span>
+                                            <span class="badge bg-primary">{{ credits }} credits</span>
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li class="course-item">No courses recorded for 2023</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        <!-- 2024 Courses -->
+                        <div class="year-section">
+                            <div class="year-header">2024 Courses</div>
+                            <ul class="course-list">
+                                {% if mva.courses_2024 %}
+                                    {% for course, credits in mva.courses_2024.items() %}
+                                        <li class="course-item">
+                                            <span>{{ course }}</span>
+                                            <span class="badge bg-primary">{{ credits }} credits</span>
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li class="course-item">No courses recorded for 2024</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+
+                        {% if mva.action_items %}
+                            <div class="action-items">
+                                <h6><i class="fas fa-tasks"></i> Action Items:</h6>
+                                {% for item in mva.action_items %}
+                                    <div class="action-item">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <div>{{ item }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if mva.staff_notes %}
+                            <div class="staff-notes">
+                                <h6><i class="fas fa-sticky-note"></i> Staff Notes:</h6>
+                                <p>{{ mva.staff_notes }}</p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -105,28 +150,38 @@
                     </div>
                     <h5 class="card-title text-center">Dual Credit</h5>
                     
-                    <div class="status-badge {{ mva_stats.dual_credit_status|lower }}">
-                        Status: {{ mva_stats.dual_credit_status }}
-                    </div>
-                    
-                    {% if mva_stats.enrolled_eca %}
-                    <div class="badge bg-info mb-3">Enrolled in Early College Academy</div>
-                    {% endif %}
-                    
-                    <p class="card-text">Credits: {{ mva_stats.dual_credits }}/9.0</p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" 
-                             role="progressbar" 
-                             style="width: {{ (mva_stats.dual_credits / 9.0) * 100 }}%">
+                    {% for mva in student.mvas if mva.mva_type == 'Dual Credit' %}
+                        <div class="status-badge status-{{ mva.status|lower|replace(' ', '-') }}">
+                            {{ mva.status }}
                         </div>
-                    </div>
-                    
-                    <h6 class="mt-4">Courses:</h6>
-                    <ul class="course-list">
-                        {% for course in mva_stats.dual_credit_courses %}
-                        <li class="course-item">{{ course }}</li>
-                        {% endfor %}
-                    </ul>
+                        
+                        <p class="card-text">Credits: {{ mva.hours_earned|default(0, true) }}/9.0</p>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-success" 
+                                 role="progressbar" 
+                                 style="width: {{ (mva.hours_earned|default(0, true) / 9.0) * 100 }}%">
+                            </div>
+                        </div>
+
+                        {% if mva.action_items %}
+                            <div class="action-items">
+                                <h6><i class="fas fa-tasks"></i> Action Items:</h6>
+                                {% for item in mva.action_items %}
+                                    <div class="action-item">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <div>{{ item }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if mva.staff_notes %}
+                            <div class="staff-notes">
+                                <h6><i class="fas fa-sticky-note"></i> Staff Notes:</h6>
+                                <p>{{ mva.staff_notes }}</p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -140,25 +195,37 @@
                     </div>
                     <h5 class="card-title text-center">Internship</h5>
                     
-                    <div class="status-badge {{ mva_stats.internship_status|lower }}">
-                        Status: {{ mva_stats.internship_status }}
-                    </div>
-                    
-                    {% if mva_stats.internship_program %}
-                    <div class="description-box">
-                        <h6>Program:</h6>
-                        <p>{{ mva_stats.internship_program }}</p>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="mt-3">
-                        <h6>Placement Status:</h6>
-                        {% if mva_stats.internship_confirmed %}
-                        <span class="badge bg-success">Placement Confirmed</span>
-                        {% else %}
-                        <span class="badge bg-warning">Placement Not Confirmed</span>
+                    {% for mva in student.mvas if mva.mva_type == 'Internship' %}
+                        <div class="status-badge status-{{ mva.status|lower|replace(' ', '-') }}">
+                            {{ mva.status }}
+                        </div>
+
+                        {% if mva.description %}
+                            <div class="description-box">
+                                <h6>Program Details:</h6>
+                                <p>{{ mva.description }}</p>
+                            </div>
                         {% endif %}
-                    </div>
+
+                        {% if mva.action_items %}
+                            <div class="action-items">
+                                <h6><i class="fas fa-tasks"></i> Action Items:</h6>
+                                {% for item in mva.action_items %}
+                                    <div class="action-item">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <div>{{ item }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if mva.staff_notes %}
+                            <div class="staff-notes">
+                                <h6><i class="fas fa-sticky-note"></i> Staff Notes:</h6>
+                                <p>{{ mva.staff_notes }}</p>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>

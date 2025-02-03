@@ -1,11 +1,48 @@
 {% extends "base.html" %}
 
-{% block title %}Flask Login{% endblock %}
+{% block title %}Market Value Asset Monitor{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 {% endblock %}
 
 {% block content %}
-<h1>Flask Starter Code</h1>
+<div class="hero-section">
+    <h1>Welcome to the Market Value Asset Monitor</h1>
+    <p class="tagline">Empowering educators to track student progress towards graduation.</p>
+</div>
+
+<div class="container">
+    <h2>Key Features:</h2>
+    <div class="features-container">
+        <div class="feature-card">
+            <h2>User Authentication</h2>
+            <p>Secure access for authorized personnel to view and manage student data.</p>
+        </div>
+        <div class="feature-card">
+            <h2>Student Progress Tracking</h2>
+            <p>Monitor Career & Technical Education (CTE) progress, Dual Credit courses, and Internship opportunities.</p>
+        </div>
+        <div class="feature-card">
+            <h2>Visual Progress Indicators</h2>
+            <p>Easily assess student status with progress bars and badges that highlight completed, in-progress, and not started MVAs.</p>
+        </div>
+        <div class="feature-card">
+            <h2>Action Items & Staff Notes</h2>
+            <p>View actionable items and notes to facilitate communication and follow-up on student progress.</p>
+        </div>
+        <div class="feature-card">
+            <h2>Detailed Reporting</h2>
+            <p>Access in-depth reports on individual students, providing insights into their MVA achievements and course completions.</p>
+        </div>
+    </div>
+
+    <p>As part of a larger system, the MVAM aims to empower educators and administrators with the tools they need to ensure that every student is on track to graduate with the skills and qualifications necessary for success in their future endeavors.</p>
+
+    <div class="cta-section">
+        <h2>Get Started</h2>
+        <p>Log in to your account to begin monitoring student progress and supporting their journey towards achieving their Market Value Assets.</p>
+        <a href="{{ url_for('login') }}" class="cta-button">Log In</a>
+    </div>
+</div>
 {% endblock %}
